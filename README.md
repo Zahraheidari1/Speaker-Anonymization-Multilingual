@@ -21,13 +21,14 @@ The anonymization system operates in three stages:
 
 ## Audio Sample
 
-The following sample is from LibriSpeech (`1272-128104-0000`) and has been processed through the anonymization pipeline.
+The following sample is from LibriSpeech (``) and has been processed through the anonymization pipeline.
+| Original | Anonymized |
+|------|-------------|
+| [1272-128104-0000](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1272-128104-0000.wav) | [1272-128104-0000](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1272-128104-0000.flac) |
+| **1 — Train Baseline** | Trains an ECAPA-TDNN ASV model with default hyperparameters |
+| **2 — Evaluate Baseline** | Runs ASV and ASR evaluation on original and anonymized speech |
 
-**Original:**
-[1](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1272-128104-0000.wav)
 
-**Anonymized:**
-[2](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1272-128104-0000.flac)
 
 > Audio: 5.58 s · 16 kHz · mono
 
