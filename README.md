@@ -25,12 +25,9 @@ The following sample is from LibriSpeech (``) and has been processed through the
 | Original | Anonymized |
 |------|-------------|
 | [1272-128104-0000](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1272-128104-0000.wav) | [1272-128104-0000](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1272-128104-0000.flac) |
-| **1 — Train Baseline** | Trains an ECAPA-TDNN ASV model with default hyperparameters |
-| **2 — Evaluate Baseline** | Runs ASV and ASR evaluation on original and anonymized speech |
+| [1462-170138-0000](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1462-170138-0000.wav) | [1462-170138-0000](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1462-170138-0000) |
+| [84-121550-0018](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/84-121550-0018.wav) | [84-121550-0018](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/84-121550-0018.flac) |
 
-
-
-> Audio: 5.58 s · 16 kHz · mono
 
 ---
 
