@@ -1,0 +1,64 @@
+lang: en
+
+root_dir: .
+exp_dir: !ref <root_dir>/exp_en
+results_summary_dir: !ref <exp_dir>/results_summary/baseline
+
+datasets:
+  en:
+    - name: librispeech_dev
+      data: librispeech
+      set: dev
+      enrolls: [eval_enrolls]
+      trials: [trials]
+
+eval_steps:
+  privacy:
+    - asv
+  utility:
+    - asr
+
+anon_data_suffix: anon
+eval_data_dir: ./data/librispeech_kaldi
+
+privacy:
+  asv:
+    model_dir: models/asv_baseline_trained
+    vec_type: ecapa
+
+    training:
+      anon: false
+      train_data_dir: ./data/librispeech_kaldi/librispeech_dev_enrolls
+      train_config: evaluation/privacy/asv/asv_train/hparams/train_ecapa_tdnn_small_ft.yaml
+      finetuning: true
+      pretrained_model: models/asv_pre_ecapa
+      lr: 0.01
+      epochs: 100
+      batch_size: 16
+      num_utt: 10
+      utt_selection: spk-random
+      num_spk: 28
+      retrain: true
+
+    evaluation:
+      results_dir: !ref <exp_dir>/results_baseline
+      distance: cosine
+      plda:
+        model_dir: null
+        train_data_dir: null
+        anon: false
+
+utility:
+  asr:
+    backend: whisper
+    model_name: asr_pre_whisper
+    model_dir: models/whisper-tiny
+
+    evaluation:
+      model_dir: !ref <utility[asr][model_dir]>
+      model_path: !ref <utility[asr][model_dir]>
+      model_url: !ref <utility[asr][model_dir]>
+      eval_batchsize: 2
+      results_dir: !ref <exp_dir>/asr_baseline_whisper
+      recognizer: whisper
+      lang: !ref <lang>

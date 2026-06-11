@@ -1,0 +1,129 @@
+# ################################
+# Model: Speaker identification with ECAPA (Improved Version)
+# ################################
+
+# Basic parameters
+seed: 1986
+__set_seed: !apply:torch.manual_seed [!ref <seed>]
+output_folder: !PLACEHOLDER 
+save_folder: !ref <output_folder>/
+train_log: !ref <output_folder>/train_log.txt
+
+# Data files
+data_folder: !PLACEHOLDER
+train_annotation: !ref <save_folder>/train.csv
+valid_annotation: !ref <save_folder>/dev.csv
+
+# Training Control
+num_utt: !PLACEHOLDER
+num_spk: !PLACEHOLDER
+utt_selected_ways: !PLACEHOLDER
+anon: !PLACEHOLDER 
+skip_prep: True
+ckpt_interval_minutes: 15
+
+# --- IMPROVED PARAMETERS ---
+number_of_epochs: !PLACEHOLDER
+batch_size: !PLACEHOLDER
+lr: !PLACEHOLDER      # پیشنهاد می‌شود برای Fine-tuning روی 0.001 تنظیم شود
+base_lr: 0.00000001
+max_lr: !ref <lr>
+# کاهش step_size: چون حجم داده کم است، عدد 65000 باعث می‌شود LR هرگز تغییر نکند.
+# تنظیم روی 1000-2000 اجازه می‌دهد نرخ یادگیری در طول اپوک‌ها نوسان (Cycle) داشته باشد.
+step_size: 2000 
+sample_rate: 16000
+sentence_len: 3.0     
+shuffle: True
+random_chunk: True
+
+# Feature parameters
+n_mels: 80
+left_frames: 0
+right_frames: 0
+deltas: False
+
+# Number of speakers
+out_n_neurons: !PLACEHOLDER
+
+dataloader_options:
+    batch_size: !ref <batch_size>
+    shuffle: !ref <shuffle>
+    num_workers: 0   
+
+# Functions
+compute_features: !new:speechbrain.lobes.features.Fbank
+    n_mels: !ref <n_mels>
+    left_frames: !ref <left_frames>
+    right_frames: !ref <right_frames>
+    deltas: !ref <deltas>
+
+embedding_model: !new:speechbrain.lobes.models.ECAPA_TDNN.ECAPA_TDNN
+    input_size: !ref <n_mels>
+    channels: [512, 512, 512, 512, 1536]
+    kernel_sizes: [5, 3, 3, 3, 1]
+    dilations: [1, 2, 3, 4, 1]
+    attention_channels: 128
+    lin_neurons: 192
+
+classifier: !new:speechbrain.lobes.models.ECAPA_TDNN.Classifier
+    input_size: 192
+    out_neurons: !ref <out_n_neurons>
+
+# Early stopping
+epoch_counter: !new:speechbrain.utils.epoch_loop.EpochCounterWithStopper
+    limit: !ref <number_of_epochs>
+    limit_to_stop: 5   # افزایش صبر مدل به 5 اپوک برای جلوگیری از توقف زودهنگام
+    limit_warmup: 2
+    direction: min
+
+mean_var_norm: !new:speechbrain.processing.features.InputNormalization
+    norm_type: sentence
+    std_norm: False
+
+modules:
+    compute_features: !ref <compute_features>
+    embedding_model: !ref <embedding_model>
+    classifier: !ref <classifier>
+    mean_var_norm: !ref <mean_var_norm>
+
+# --- IMPROVED LOSS FUNCTION ---
+compute_cost: !new:speechbrain.nnet.losses.LogSoftmaxWrapper
+    loss_fn: !new:speechbrain.nnet.losses.AdditiveAngularMargin
+        margin: 0.3    # افزایش از 0.2 به 0.3 برای سخت‌گیرانه‌تر کردن مرز بین گویندگان
+        scale: 30
+
+compute_error: !name:speechbrain.nnet.losses.classification_error
+
+opt_class: !name:torch.optim.Adam
+    lr: !ref <lr>
+    weight_decay: 0.00001 # افزایش جزئی برای جلوگیری از Overfitting روی داده‌های محدود
+
+lr_annealing: !new:speechbrain.nnet.schedulers.CyclicLRScheduler
+    base_lr: !ref <base_lr>
+    max_lr: !ref <max_lr>
+    step_size: !ref <step_size>
+
+# Logging + checkpoints
+train_logger: !new:speechbrain.utils.train_logger.FileTrainLogger
+    save_file: !ref <train_log>
+
+error_stats: !name:speechbrain.utils.metric_stats.MetricStats
+    metric: !name:speechbrain.nnet.losses.classification_error
+        reduction: batch
+
+checkpointer: !new:speechbrain.utils.checkpoints.Checkpointer
+    checkpoints_dir: !ref <save_folder>
+    recoverables:
+        embedding_model: !ref <embedding_model>
+        classifier: !ref <classifier>
+        normalizer: !ref <mean_var_norm>
+        counter: !ref <epoch_counter>
+
+pretrained_path: !PLACEHOLDER
+
+pretrainer: !new:speechbrain.utils.parameter_transfer.Pretrainer
+    collect_in: !ref <save_folder>
+    loadables:
+        embedding_model: !ref <embedding_model>
+    paths:
+        embedding_model: !ref <pretrained_path>/embedding_model.ckpt
