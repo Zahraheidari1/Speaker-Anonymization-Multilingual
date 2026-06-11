@@ -24,7 +24,7 @@ The anonymization system operates in three stages:
 The following sample is from LibriSpeech (`1272-128104-0000`) and has been processed through the anonymization pipeline.
 
 **Original:**
-[1272-128104-0000.wav](1272-128104-0000.wav)
+[1272-128104-0000.wav](https://github.com/Zahraheidari1/Speaker-Anonymization-Multilingual/releases/download/v1.0/1272-128104-0000.wav)
 
 **Anonymized:**
 [1272-128104-0000.flac](1272-128104-0000.flac)
